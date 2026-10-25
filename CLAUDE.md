@@ -28,7 +28,19 @@ CKA(Certified Kubernetes Administrator) 시험 준비용 저장소다. `docs/` �
 ## 게시 규칙
 
 GitHub Pages 는 `main` 브랜치의 `/docs` 폴더를 배포한다(Settings → Pages → Deploy from a branch → `main` / `/docs`).
-작업은 세션에 지정된 브랜치에서 커밋하고 push 한다.
+
+**사용자 결정 (2026-10-25)**: 매일 만든 문제는 **main 에 바로 반영**한다. PR 은 만들지 않는다.
+이 저장소에서 문제 세트·사이트 수정을 게시할 때는 main 에 push 해도 된다는 사용자의 명시적 허락이다.
+
+```bash
+git fetch origin main
+git rebase origin/main               # 작업 브랜치를 push 하기 전에 main 최신 위로 올린다
+git push -u origin <세션 작업 브랜치>
+git push origin HEAD:main            # fast-forward 로만 반영
+```
+
+- main 에 force push 하지 않는다. `HEAD:main` push 가 거부되면 원인(다른 커밋이 먼저 들어갔는지)을 확인하고 다시 rebase 한다.
+- push 후 1~2분 뒤 사이트에서 새 Day 가 보이는지 확인한다.
 
 ## 사이트 코드를 고칠 때
 
