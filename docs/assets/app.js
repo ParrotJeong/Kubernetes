@@ -181,6 +181,7 @@
     const days = manifest.days.slice().sort((a, b) => a.day - b.day);
     const done = doneMap();
     const flags = flagMap();
+    const read = store.get("read", {});
 
     // 오늘의 문제
     const latest = days[days.length - 1];
@@ -192,7 +193,7 @@
       const { total, solved } = dayProgress(latest, done);
       const mins = latest.problems.reduce((s, p) => s + p.minutes, 0);
       todayBox.innerHTML = `
-        <div class="eyebrow">${isToday ? "오늘의 문제" : "최신 문제"} · Day ${latest.day} · ${esc(latest.date)}</div>
+        <div class="eyebrow">${isToday ? "오늘의 학습" : "최신 학습"} · Day ${latest.day} · ${esc(latest.date)}</div>
         <h2>${esc(latest.title)}</h2>
         <p class="summary">${esc(latest.summary)}</p>
         <ul class="problem-list">
@@ -204,8 +205,13 @@
             .join("")}
         </ul>
         <div class="actions">
-          <a class="btn" href="day.html?d=${latest.day}">${solved ? "이어서 풀기" : "문제 풀기"} →</a>
-          <span class="muted small" style="align-self:center">${solved}/${total} 완료 · 권장 ${mins}분</span>
+          ${
+            latest.study
+              ? `<a class="btn" href="day.html?d=${latest.day}&view=notes">📖 학습 노트${latest.study_minutes ? ` · 약 ${latest.study_minutes}분` : ""}</a>`
+              : ""
+          }
+          <a class="btn${latest.study ? " secondary" : ""}" href="day.html?d=${latest.day}&view=problems">✍️ ${solved ? "이어서 풀기" : "문제 풀기"}</a>
+          <span class="muted small" style="align-self:center">${read[`D${latest.day}`] ? "노트 읽음 ✓ · " : ""}${solved}/${total} 완료 · 권장 ${mins}분</span>
         </div>`;
     }
 
@@ -285,7 +291,7 @@
               <div class="day-num"><div><small>DAY</small>${d.day}</div></div>
               <div><div class="title">${esc(d.title)}</div>
                 <div class="meta">${esc(d.date)} · ${esc(d.focus)}</div></div>
-              <div class="progress">${solved === total ? "✔ 완료" : `${solved}/${total}`}</div></a>`;
+              <div class="progress">${read[`D${d.day}`] ? "📖✓ · " : ""}${solved === total ? "✔ 완료" : `${solved}/${total}`}</div></a>`;
           })
           .join("")
       : `<div class="empty">아직 없습니다.</div>`;
@@ -299,113 +305,116 @@
       : `<p class="muted small">로드맵을 모두 마쳤습니다. 이제 약점 복습 세트와 추가 모의고사를 요청하세요.</p>`;
   }
 
-  // ---------- Day 페이지 ----------
+  // ---------- Day 페이지 (학습 노트 / 문제 탭) ----------
   function parseMeta(text) {
     const m = /domain:\s*([a-z]+)\s*\|\s*level:\s*([1-3])\s*\|\s*minutes:\s*(\d+)/.exec(text);
     return m ? { domain: m[1], level: Number(m[2]), minutes: Number(m[3]) } : null;
   }
 
-  async function initDay() {
-    const root = $("#day");
-    const params = new URLSearchParams(location.search);
-    let manifest, curriculum;
-    try {
-      [manifest, curriculum] = await Promise.all([getJSON("days/manifest.json"), getJSON("data/curriculum.json")]);
-    } catch (e) {
-      showError(root, e);
-      return;
-    }
-    const domains = domainMap(curriculum);
-    const days = manifest.days.slice().sort((a, b) => a.day - b.day);
-    if (!days.length) {
-      root.innerHTML = `<div class="empty">아직 만들어진 문제가 없습니다.</div>`;
-      return;
-    }
-    const want = Number(params.get("d")) || days[days.length - 1].day;
-    const entry = days.find((d) => d.day === want);
-    if (!entry) {
-      showError(root, new Error(`Day ${want} 은(는) 아직 없습니다.`));
-      return;
-    }
-    let md;
-    try {
-      md = await getText(entry.file);
-    } catch (e) {
-      showError(root, e);
-      return;
-    }
-    document.title = `Day ${entry.day} · ${entry.title} — CKA Daily`;
-    const totalMin = entry.problems.reduce((s, p) => s + p.minutes, 0);
-    $("#day-head").innerHTML = `
-      <div class="eyebrow">Day ${entry.day} · ${esc(entry.date)} · ${esc(entry.focus)}</div>
-      <h1>${esc(entry.title)}</h1>
-      <p class="muted" style="margin:0">${esc(entry.summary)}</p>`;
-
-    const content = $("#day-content");
-    content.innerHTML = renderMarkdown(stripFrontMatter(md));
-    const firstH1 = content.querySelector("h1");
-    if (firstH1) firstH1.remove();
-
-    // h2 기준으로 카드 나누기: "Q1. ..." 은 문제 카드, 나머지는 일반 카드
+  // 렌더링된 마크다운을 h2 단위 카드로 나눈다.
+  // onH2(h2) 가 { section, ... } 을 돌려주면 그 카드를 쓰고(h2 배치도 onH2 책임), null 이면 일반 카드에 넣는다.
+  // onNode(node, current) 가 true 를 돌려주면 그 노드는 카드에 넣지 않는다.
+  function splitSections(content, onH2, onNode) {
     const nodes = Array.from(content.childNodes);
     content.textContent = "";
+    const block = () => {
+      const section = document.createElement("section");
+      section.className = "md-block md";
+      return { section };
+    };
     let current = null;
-    const done = doneMap();
-    const flags = flagMap();
     for (const node of nodes) {
       if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) continue;
       if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "H2") {
-        const m = /^(Q\d+)\.\s*(.*)$/.exec(node.textContent.trim());
-        const section = document.createElement("section");
-        if (m) {
-          const qid = m[1];
-          const id = pid(entry.day, qid);
-          section.className = "problem md";
-          section.id = qid.toLowerCase();
-          section.dataset.pid = id;
-          section.innerHTML = `
-            <div class="problem-head">
-              <div><div class="badges"></div></div>
-              <div class="problem-actions">
-                <label class="done-toggle"><input type="checkbox"${done[id] ? " checked" : ""}> 완료</label>
-                <button type="button" class="flag-toggle" aria-pressed="${flags[id] ? "true" : "false"}">${flags[id] ? "★" : "☆"} 다시 보기</button>
-              </div>
-            </div>`;
-          section.querySelector(".problem-head > div").prepend(node);
-          if (done[id]) section.classList.add("is-done");
-          current = { section, isProblem: true, meta: null };
-        } else {
-          section.className = "md-block md";
-          section.appendChild(node);
-          current = { section, isProblem: false };
+        current = onH2 ? onH2(node) : null;
+        if (!current) {
+          current = block();
+          current.section.appendChild(node);
         }
-        content.appendChild(section);
+        content.appendChild(current.section);
         continue;
       }
       if (!current) {
-        const section = document.createElement("section");
-        section.className = "md-block md";
-        content.appendChild(section);
-        current = { section, isProblem: false };
+        current = block();
+        content.appendChild(current.section);
       }
-      if (node.nodeType === Node.COMMENT_NODE && current.isProblem && !current.meta) {
-        const meta = parseMeta(node.textContent);
-        if (meta) {
-          current.meta = meta;
-          current.section.querySelector(".badges").innerHTML =
-            `${domainBadge(meta.domain, domains)}<span class="badge">${LEVEL[meta.level]}</span><span class="badge">⏱ ${meta.minutes}분</span>`;
-          continue;
-        }
-      }
+      if (onNode && onNode(node, current)) continue;
       current.section.appendChild(node);
     }
+  }
 
-    content.querySelectorAll("details").forEach((d) => {
+  function classifyDetails(root) {
+    root.querySelectorAll("details").forEach((d) => {
       const s = d.querySelector("summary");
       const label = s ? s.textContent.trim() : "";
       if (label.startsWith("정답")) d.classList.add("solution");
       else if (label.startsWith("힌트")) d.classList.add("hint");
     });
+  }
+
+  function renderNotes(entry, md) {
+    const content = $("#notes-content");
+    content.innerHTML = renderMarkdown(stripFrontMatter(md));
+    const h1 = content.querySelector("h1");
+    if (h1) h1.remove();
+    const toc = [];
+    splitSections(content, (h2) => {
+      h2.id = `n${toc.length + 1}`;
+      toc.push({ id: h2.id, text: h2.textContent.trim() });
+      return null;
+    });
+    classifyDetails(content);
+    enhanceCode(content);
+    externalLinks(content);
+    $("#notes-toc").innerHTML = toc.map((t) => `<a href="#${t.id}">${esc(t.text)}</a>`).join("");
+
+    const key = `D${entry.day}`;
+    const box = $("#notes-read");
+    box.checked = Boolean(store.get("read", {})[key]);
+    box.addEventListener("change", () => setIn("read", key, box.checked ? Date.now() : null));
+  }
+
+  function renderProblems(entry, md, domains) {
+    const content = $("#day-content");
+    content.innerHTML = renderMarkdown(stripFrontMatter(md));
+    const h1 = content.querySelector("h1");
+    if (h1) h1.remove();
+    const done = doneMap();
+    const flags = flagMap();
+    // "Q1. ..." 은 문제 카드, 나머지 h2 는 일반 카드
+    splitSections(
+      content,
+      (h2) => {
+        const m = /^(Q\d+)\.\s*(.*)$/.exec(h2.textContent.trim());
+        if (!m) return null;
+        const id = pid(entry.day, m[1]);
+        const section = document.createElement("section");
+        section.className = "problem md";
+        section.id = m[1].toLowerCase();
+        section.dataset.pid = id;
+        section.innerHTML = `
+          <div class="problem-head">
+            <div><div class="badges"></div></div>
+            <div class="problem-actions">
+              <label class="done-toggle"><input type="checkbox"${done[id] ? " checked" : ""}> 완료</label>
+              <button type="button" class="flag-toggle" aria-pressed="${flags[id] ? "true" : "false"}">${flags[id] ? "★" : "☆"} 다시 보기</button>
+            </div>
+          </div>`;
+        section.querySelector(".problem-head > div").prepend(h2);
+        if (done[id]) section.classList.add("is-done");
+        return { section, isProblem: true, meta: null };
+      },
+      (node, current) => {
+        if (node.nodeType !== Node.COMMENT_NODE || !current.isProblem || current.meta) return false;
+        const meta = parseMeta(node.textContent);
+        if (!meta) return false;
+        current.meta = meta;
+        current.section.querySelector(".badges").innerHTML =
+          `${domainBadge(meta.domain, domains)}<span class="badge">${LEVEL[meta.level]}</span><span class="badge">⏱ ${meta.minutes}분</span>`;
+        return true;
+      },
+    );
+    classifyDetails(content);
     enhanceCode(content);
     externalLinks(content);
 
@@ -445,7 +454,81 @@
       toggleAll.textContent = open ? "정답 모두 접기" : "정답 모두 펼치기";
     });
 
-    initTimer(totalMin);
+    initTimer(entry.problems.reduce((s, p) => s + p.minutes, 0));
+  }
+
+  function initTabs(hasNotes, initial) {
+    const tabs = { notes: $("#tab-notes"), problems: $("#tab-problems") };
+    const panels = { notes: $("#panel-notes"), problems: $("#panel-problems") };
+    tabs.notes.hidden = !hasNotes;
+    const show = (view, fromClick) => {
+      for (const k of Object.keys(tabs)) {
+        const on = k === view;
+        tabs[k].setAttribute("aria-selected", String(on));
+        tabs[k].tabIndex = on ? 0 : -1;
+        panels[k].hidden = !on;
+      }
+      if (fromClick) {
+        const url = new URL(location.href);
+        url.searchParams.set("view", view);
+        url.hash = "";
+        history.replaceState(null, "", url);
+        const top = $("#day-tabs").getBoundingClientRect().top + window.scrollY - 64;
+        if (window.scrollY > top) window.scrollTo(0, top);
+      }
+    };
+    tabs.notes.addEventListener("click", () => show("notes", true));
+    tabs.problems.addEventListener("click", () => show("problems", true));
+    show(initial, false);
+    return show;
+  }
+
+  async function initDay() {
+    const root = $("#day");
+    const params = new URLSearchParams(location.search);
+    let manifest, curriculum;
+    try {
+      [manifest, curriculum] = await Promise.all([getJSON("days/manifest.json"), getJSON("data/curriculum.json")]);
+    } catch (e) {
+      showError(root, e);
+      return;
+    }
+    const domains = domainMap(curriculum);
+    const days = manifest.days.slice().sort((a, b) => a.day - b.day);
+    if (!days.length) {
+      root.innerHTML = `<div class="empty">아직 만들어진 문제가 없습니다.</div>`;
+      return;
+    }
+    const want = Number(params.get("d")) || days[days.length - 1].day;
+    const entry = days.find((d) => d.day === want);
+    if (!entry) {
+      showError(root, new Error(`Day ${want} 은(는) 아직 없습니다.`));
+      return;
+    }
+    let problemsMd, notesMd;
+    try {
+      [problemsMd, notesMd] = await Promise.all([getText(entry.file), entry.study ? getText(entry.study) : null]);
+    } catch (e) {
+      showError(root, e);
+      return;
+    }
+    document.title = `Day ${entry.day} · ${entry.title} — CKA Daily`;
+    const totalMin = entry.problems.reduce((s, p) => s + p.minutes, 0);
+    $("#day-head").innerHTML = `
+      <div class="eyebrow">Day ${entry.day} · ${esc(entry.date)} · ${esc(entry.focus)}</div>
+      <h1>${esc(entry.title)}</h1>
+      <p class="muted" style="margin:0">${esc(entry.summary)}</p>`;
+    $("#problems-count").textContent = `${entry.problems.length}문제 · ${totalMin}분`;
+    if (entry.study_minutes) $("#notes-count").textContent = `약 ${entry.study_minutes}분`;
+
+    if (notesMd) renderNotes(entry, notesMd);
+    renderProblems(entry, problemsMd, domains);
+
+    let view = params.get("view");
+    if (view !== "notes" && view !== "problems") view = location.hash.startsWith("#q") || !notesMd ? "problems" : "notes";
+    if (!notesMd) view = "problems";
+    const show = initTabs(Boolean(notesMd), view);
+    $("#go-problems").addEventListener("click", () => show("problems", true));
 
     // 이전/다음 Day
     const idx = days.indexOf(entry);
@@ -524,7 +607,7 @@
       }
       const isReady = ready.has(d.day);
       const status = isReady
-        ? `<a href="day.html?d=${d.day}" onclick="event.stopPropagation()">문제 보기 →</a>`
+        ? `<a href="day.html?d=${d.day}&view=notes">노트</a> · <a href="day.html?d=${d.day}&view=problems">문제</a>`
         : d.day === nextDay
           ? `<span class="badge" style="color:var(--accent-text)">다음 차례</span>`
           : `<span class="muted">예정</span>`;

@@ -22,20 +22,40 @@
 
   <main class="narrow" id="day">
     <div class="day-head" id="day-head"><div class="empty">불러오는 중…</div></div>
-    <div class="day-tools">
-      <nav class="qnav" id="qnav" aria-label="문제 바로가기"></nav>
-      <div class="timer">
-        <button type="button" class="toggle-all" id="toggle-solutions">정답 모두 펼치기</button>
-        <span class="clock" id="timer-clock" aria-live="off">0:00</span>
-        <button type="button" id="timer-start">타이머 시작</button>
-        <button type="button" id="timer-reset" aria-label="타이머 초기화">↺</button>
-      </div>
+
+    <div class="tabs" id="day-tabs" role="tablist" aria-label="Day 보기 전환">
+      <button type="button" class="tab" role="tab" id="tab-notes" aria-controls="panel-notes" aria-selected="true">📖 학습 노트 <span class="count" id="notes-count"></span></button>
+      <button type="button" class="tab" role="tab" id="tab-problems" aria-controls="panel-problems" aria-selected="false">✍️ 문제 <span class="count" id="problems-count"></span></button>
     </div>
-    <div id="day-content"></div>
+
+    <section id="panel-notes" role="tabpanel" aria-labelledby="tab-notes">
+      <div class="notes-tools">
+        <nav class="toc" id="notes-toc" aria-label="학습 노트 목차"></nav>
+      </div>
+      <div id="notes-content"></div>
+      <div class="notes-end">
+        <label class="done-toggle"><input type="checkbox" id="notes-read"> 다 읽었어요</label>
+        <button type="button" class="btn" id="go-problems">✍️ 문제 풀러 가기 →</button>
+      </div>
+    </section>
+
+    <section id="panel-problems" role="tabpanel" aria-labelledby="tab-problems" hidden>
+      <div class="day-tools">
+        <nav class="qnav" id="qnav" aria-label="문제 바로가기"></nav>
+        <div class="timer">
+          <button type="button" class="toggle-all" id="toggle-solutions">정답 모두 펼치기</button>
+          <span class="clock" id="timer-clock" aria-live="off">0:00</span>
+          <button type="button" id="timer-start">타이머 시작</button>
+          <button type="button" id="timer-reset" aria-label="타이머 초기화">↺</button>
+        </div>
+      </div>
+      <div id="day-content"></div>
+    </section>
+
     <div class="pager" id="pager"></div>
   </main>
 
-  <footer class="site-footer">완료 체크와 ‘다시 보기’ 표시는 이 브라우저에만 저장됩니다.</footer>
+  <footer class="site-footer">읽음·완료 체크와 ‘다시 보기’ 표시는 이 브라우저에만 저장됩니다.</footer>
   <script src="assets/vendor/marked.min.js"></script>
   <script src="assets/vendor/highlight.min.js"></script>
   <script src="assets/app.js"></script>

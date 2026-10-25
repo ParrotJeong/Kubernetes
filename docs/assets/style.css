@@ -262,6 +262,24 @@ main.narrow { max-width: 860px; }
 .timer button:hover { background: var(--surface-2); }
 .toggle-all { font-size: 14px; }
 
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 18px 0 14px; }
+.tab {
+  border: 0; background: none; cursor: pointer; padding: 10px 14px; margin-bottom: -1px;
+  font-weight: 600; font-size: 15.5px; color: var(--muted); border-bottom: 2px solid transparent;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--accent-text); border-bottom-color: var(--accent); }
+.tab .count { font-weight: 400; font-size: 13px; color: var(--muted); margin-left: 2px; }
+.notes-tools { margin-bottom: 14px; }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.toc a {
+  font-size: 13.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+}
+.toc a:hover { border-color: var(--accent); text-decoration: none; }
+.notes-end { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; margin: 8px 0 0; }
+.md-block h2 { scroll-margin-top: 70px; }
+
 .md-block, .problem {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   box-shadow: var(--shadow); padding: 4px 22px 18px; margin: 0 0 16px;
@@ -290,7 +308,11 @@ main.narrow { max-width: 860px; }
   background: var(--accent-weak); border-radius: 0 10px 10px 0;
 }
 .md blockquote p:last-child { margin-bottom: 0; }
-.md table { border-collapse: collapse; width: 100%; margin: 0 0 14px; font-size: 15px; display: block; overflow-x: auto; }
+.md table {
+  border-collapse: collapse; width: 100%; margin: 0 0 14px; font-size: 15px; display: block; overflow-x: auto;
+  overflow-wrap: normal; word-break: keep-all;   /* 좁은 화면에서 단어 중간이 끊기지 않고 가로 스크롤 */
+}
+.md td code, .md th code { overflow-wrap: anywhere; }
 .md th, .md td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
 .md th { background: var(--surface-2); }
 .md hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
@@ -366,6 +388,8 @@ pre code { font: inherit; background: none; padding: 0; border: 0; }
   .road-item .body { padding-left: 16px; }
   .day-tools { position: static; }
   .problem { scroll-margin-top: 64px; }
+  .toc { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .toc a { flex: none; }
   .site-header .inner { gap: 10px; }
   .brand .label { display: none; }
   .day-item { grid-template-columns: auto minmax(0, 1fr); }

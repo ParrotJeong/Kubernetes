@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T14:16:47Z",
+  "generated_at": "2026-10-25T14:44:23Z",
   "days": [
     {
       "day": 1,
@@ -44,7 +44,10 @@
           "level": 2,
           "minutes": 6
         }
-      ]
+      ],
+      "study": "study/day-001.md",
+      "study_title": "클러스터 아키텍처와 Pod",
+      "study_minutes": 16
     }
   ]
 }

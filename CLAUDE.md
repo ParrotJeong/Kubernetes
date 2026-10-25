@@ -1,28 +1,31 @@
 # CKA Daily 저장소
 
 CKA(Certified Kubernetes Administrator) 시험 준비용 저장소다. `docs/` 가 GitHub Pages 사이트이고,
-사용자가 매일 아침 요청하면 Claude 가 그날의 실기형 문제를 만들어 올린다.
+사용자가 매일 아침 요청하면 Claude 가 그날의 **학습 노트**(KodeKloud 강의 노트와 공식 문서를 한국어로 정리)와
+**실기형 문제**를 만들어 올린다.
 
 - 사이트: https://parrotjeong.github.io/Kubernetes/
 - 대화와 해설은 한국어로 쓴다. 문제 본문(Task)은 실제 시험처럼 영어로 쓰고 한국어 요약을 붙인다.
 
 ## 매일 문제 요청
 
-"오늘 CKA 문제 만들어줘", "오늘 문제", "Day N 문제", "모의고사 만들어줘" 같은 요청은
-`.claude/skills/cka-daily/SKILL.md` 절차를 따른다. 사용자가 어려웠다고 말한 주제는 `notes/feedback.md` 에 기록한다.
+"오늘 CKA 문제 만들어줘", "오늘 공부할 거", "오늘 문제", "Day N 문제", "모의고사 만들어줘" 같은 요청은
+`.claude/skills/cka-daily/SKILL.md` 절차를 따른다. 문제만 요청해도 학습 노트를 함께 만든다(사용자 요청, 2026-10-25).
+사용자가 어려웠다고 말한 주제는 `notes/feedback.md` 에 기록한다.
 
 ## 구조
 
 | 경로 | 내용 |
 | --- | --- |
 | `docs/index.html`, `day.html`, `roadmap.html`, `guide.html`, `docs/assets/` | 정적 사이트. 빌드 없음, `docs/.nojekyll` 로 Jekyll 끔 |
+| `docs/study/day-NNN.md` | Day 별 학습 노트 (강의 노트·공식 문서 한국어 요약) |
 | `docs/days/day-NNN.md` | Day 별 문제 |
 | `docs/days/manifest.json` | `python3 scripts/cka.py build` 가 생성한다. 직접 고치지 않는다 |
 | `docs/data/curriculum.json` | 공식 시험 정보·도메인·비중 (`verified_at` 은 공식 페이지 확인일) |
 | `docs/data/plan.json` | 33일 로드맵 (KodeKloud CKA 강의 순서) |
 | `docs/pages/guide.md` | 시험 가이드 페이지 본문 |
 | `notes/feedback.md` | 사용자 피드백 → 복습 문제에 반영 |
-| `scripts/cka.py` | `next` / `build` / `check-links` / `yaml` |
+| `scripts/cka.py` | `next` / `build` / `check-links` / `yaml` / `doc` (문서 본문 텍스트 추출) |
 | `scripts/sandbox.sh`, `scripts/fake_kubelet.py` | 정답 검증용 로컬 컨트롤 플레인 |
 
 ## 게시 규칙

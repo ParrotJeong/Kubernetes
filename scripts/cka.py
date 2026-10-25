@@ -2,11 +2,12 @@
 """CKA Daily 도우미 스크립트.
 
     python3 scripts/cka.py next                 # 다음 Day 번호, 로드맵 항목, 도메인별 출제 현황 출력
-    python3 scripts/cka.py build                # docs/days/*.md 형식 검증 후 docs/days/manifest.json 생성
-    python3 scripts/cka.py check-links [FILE…]  # 링크 상태 확인 (인자 없으면 로드맵 + 모든 Day 파일)
-    python3 scripts/cka.py yaml FILE OUTDIR     # Day 파일의 ```yaml 블록을 OUTDIR 에 파일로 추출(문법 검사 포함)
+    python3 scripts/cka.py build                # 문제·학습 노트 형식 검증 후 docs/days/manifest.json 생성
+    python3 scripts/cka.py check-links [FILE…]  # 링크 상태 확인 (인자 없으면 로드맵 + 모든 Day·학습 노트)
+    python3 scripts/cka.py yaml FILE OUTDIR     # 마크다운의 ```yaml 블록을 OUTDIR 에 파일로 추출(문법 검사 포함)
+    python3 scripts/cka.py doc URL              # 공식 문서(HTML)·KodeKloud 노트(page.md) 본문을 텍스트로 출력
 
-Day 파일 형식은 .claude/skills/cka-daily/SKILL.md 참고.
+문제(docs/days/day-NNN.md)와 학습 노트(docs/study/day-NNN.md) 형식은 .claude/skills/cka-daily/SKILL.md 참고.
 """
 from __future__ import annotations
 
@@ -16,11 +17,13 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 DAYS_DIR = DOCS / "days"
+STUDY_DIR = DOCS / "study"
 PLAN = DOCS / "data" / "plan.json"
 CURRICULUM = DOCS / "data" / "curriculum.json"
 MANIFEST = DAYS_DIR / "manifest.json"
@@ -138,6 +141,36 @@ def parse_day(path: Path, domains: list[str]) -> dict:
     }
 
 
+def parse_study(path: Path, day: int) -> dict:
+    """학습 노트 하나를 검증하고 manifest 에 넣을 정보를 돌려준다. 문제가 있으면 ValueError."""
+    errors: list[str] = []
+    meta, body = parse_front_matter(path.read_text(encoding="utf-8"), path)
+    for key in ("day", "title"):
+        if not meta.get(key):
+            errors.append(f"front matter 누락: {key}")
+    if meta.get("day") and int(meta["day"]) != day:
+        errors.append(f"front matter day({meta['day']}) 와 파일명(day-{day:03d}) 불일치")
+    headings = re.findall(r"^## (.+)$", body, re.M)
+    if len(headings) < 4:
+        errors.append(f"'## ' 섹션이 너무 적습니다 ({len(headings)}개). 주제별로 나눠 정리하세요")
+    sources = body.split("## 📚 출처", 1)
+    if len(sources) < 2 or not LINK_RE.search(sources[1]):
+        errors.append("'## 📚 출처' 섹션과 그 안의 링크가 필요합니다")
+    if body.count("```") % 2:
+        errors.append("코드 펜스(```) 개수가 홀수입니다")
+    for line in unescaped_tildes(body):
+        errors.append(f"범위 표기 '~' 는 '\\~' 로 쓰세요 (취소선이 됨): {line[:70]}")
+    if errors:
+        raise ValueError(f"study/{path.name}:\n  - " + "\n  - ".join(errors))
+    # 읽는 시간: 한글 450자/분 + 영어 단어 180개/분 + 코드 30줄/분 (링크 URL 은 세지 않음)
+    code_lines = "\n".join(FENCE_RE.findall(body)).count("\n")
+    prose = re.sub(r"\]\([^)]*\)", "]", FENCE_RE.sub("", body))
+    hangul = len(re.findall(r"[가-힣]", prose))
+    words = len(re.findall(r"[A-Za-z][A-Za-z0-9._/-]*", prose))
+    minutes = max(5, round(hangul / 450 + words / 180 + code_lines / 30))
+    return {"study": f"study/{path.name}", "study_title": meta["title"], "study_minutes": minutes}
+
+
 def day_files() -> list[Path]:
     return sorted(p for p in DAYS_DIR.glob("day-*.md"))
 
@@ -147,7 +180,12 @@ def cmd_build(_args) -> int:
     entries, failed = [], False
     for path in day_files():
         try:
-            entries.append(parse_day(path, domains))
+            entry = parse_day(path, domains)
+            study = STUDY_DIR / path.name
+            if not study.exists():
+                raise ValueError(f"{path.name}: 학습 노트 docs/study/{path.name} 가 없습니다")
+            entry.update(parse_study(study, entry["day"]))
+            entries.append(entry)
         except ValueError as e:
             failed = True
             print(f"[오류] {e}", file=sys.stderr)
@@ -188,6 +226,7 @@ def cmd_next(_args) -> int:
     item = next((d for d in plan["days"] if d["day"] == nxt), None)
 
     print(f"# 다음 Day: {nxt}  (완료된 Day: {done})")
+    print(f"만들 파일: docs/study/day-{nxt:03d}.md (학습 노트) + docs/days/day-{nxt:03d}.md (문제)")
     if item is None:
         print("로드맵 범위를 넘었습니다 → 약점 복습 세트 또는 추가 모의고사를 만드세요.")
     else:
@@ -237,7 +276,7 @@ def collect_links(files: list[Path]) -> list[str]:
         cur = load_json(CURRICULUM)
         urls += [s["url"] for s in cur["exam"]["sources"]] + [s["url"] for s in cur["exam"]["allowed_docs"]]
         urls.append(plan["practice"]["url"])
-        files = day_files() + sorted((DOCS / "pages").glob("*.md"))
+        files = day_files() + sorted(STUDY_DIR.glob("day-*.md")) + sorted((DOCS / "pages").glob("*.md"))
     for f in files:
         urls += LINK_RE.findall(f.read_text(encoding="utf-8"))
     return list(dict.fromkeys(urls))
@@ -305,7 +344,114 @@ def cmd_yaml(args) -> int:
     return 1 if failed else 0
 
 
-COMMANDS = {"next": cmd_next, "build": cmd_build, "check-links": cmd_check_links, "yaml": cmd_yaml}
+class _DocText(HTMLParser):
+    """문서 HTML 에서 본문 컨테이너(kubernetes.io 의 div.td-content, 없으면 article/main)만 간단한 마크다운으로 옮긴다."""
+
+    SKIP = {"script", "style", "nav", "svg", "button", "header", "footer"}
+
+    def __init__(self, container):
+        super().__init__(convert_charrefs=True)
+        self.container = container  # (tag, class 또는 None)
+        self.depth = 0
+        self.skip = 0
+        self.pre = False
+        self.lines: list[str] = []
+        self.line = ""
+
+    def _flush(self):
+        if self.line.strip():
+            self.lines.append(self.line.rstrip())
+        self.line = ""
+
+    def handle_starttag(self, tag, attrs):
+        if not self.depth:
+            want_tag, want_class = self.container
+            classes = (dict(attrs).get("class") or "").split()
+            if tag == want_tag and (want_class is None or want_class in classes):
+                self.depth = 1
+            return
+        if tag == self.container[0]:
+            self.depth += 1
+        if tag in self.SKIP:
+            self.skip += 1
+        if self.skip:
+            return
+        if tag in ("h1", "h2", "h3", "h4"):
+            self._flush()
+            self.line = "#" * int(tag[1]) + " "
+        elif tag in ("p", "div", "table", "tr", "ul", "ol", "blockquote", "br"):
+            self._flush()
+        elif tag == "li":
+            self._flush()
+            self.line = "- "
+        elif tag == "pre":
+            self._flush()
+            self.lines.append("```")
+            self.pre = True
+        elif tag in ("td", "th"):
+            self.line += " | "
+        elif tag == "code" and not self.pre:
+            self.line += "`"
+
+    def handle_endtag(self, tag):
+        if not self.depth:
+            return
+        if tag in self.SKIP and self.skip:
+            self.skip -= 1
+        elif not self.skip:
+            if tag == "pre":
+                self._flush()
+                self.lines.append("```")
+                self.pre = False
+            elif tag == "code" and not self.pre:
+                self.line += "`"
+            elif tag in ("h1", "h2", "h3", "h4", "p", "li", "tr"):
+                self._flush()
+        if tag == self.container[0]:
+            self.depth -= 1
+            if not self.depth:
+                self._flush()
+
+    def handle_data(self, data):
+        if not self.depth or self.skip:
+            return
+        if self.pre:
+            parts = data.split("\n")
+            for i, part in enumerate(parts):
+                self.line += part
+                if i < len(parts) - 1:
+                    self.lines.append(self.line)
+                    self.line = ""
+        elif data.strip():
+            self.line += " ".join(data.split()) + (" " if data[-1].isspace() else "")
+
+
+def cmd_doc(args) -> int:
+    if len(args) != 1:
+        print("usage: cka.py doc URL", file=sys.stderr)
+        return 2
+    url = args[0]
+    out = subprocess.run(["curl", "-fsSL", "--max-time", "30", url], capture_output=True, text=True)
+    if out.returncode != 0:
+        print(f"가져오기 실패: {out.stderr.strip()}", file=sys.stderr)
+        return 1
+    if url.endswith(".md"):  # KodeKloud page.md: 이미지·안내 줄만 걸러서 그대로 출력
+        skip = ("![", "> ## Documentation Index", "> Fetch the complete", "> Use this file")
+        print("\n".join(l for l in out.stdout.splitlines() if not l.startswith(skip)))
+        return 0
+    html = out.stdout
+    for container in (("div", "td-content"), ("article", None), ("main", None), ("body", None)):
+        parser = _DocText(container)
+        parser.feed(html)
+        parser._flush()
+        if len(parser.lines) > 5:
+            print("\n".join(parser.lines))
+            return 0
+    print("본문을 찾지 못했습니다", file=sys.stderr)
+    return 1
+
+
+COMMANDS = {"next": cmd_next, "build": cmd_build, "check-links": cmd_check_links, "yaml": cmd_yaml, "doc": cmd_doc}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
