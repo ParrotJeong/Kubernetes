@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKA Daily — 매일 실습 문제</title>
+  <meta name="description" content="CKA 공식 커리큘럼과 KodeKloud 강의 노트를 바탕으로 매일 만드는 실기형 연습 문제">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23326ce5'/%3E%3Ctext x='16' y='22' font-size='15' font-family='Arial' font-weight='700' fill='white' text-anchor='middle'%3EK8s%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="index">
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="index.html"><span class="brand-mark">K</span><span class="label">CKA Daily</span></a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="index.html" data-nav="index">대시보드</a>
+        <a href="roadmap.html" data-nav="roadmap">로드맵</a>
+        <a href="guide.html" data-nav="guide">시험 가이드</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="테마 전환">☾</button>
+    </div>
+  </header>
+
+  <main id="dashboard">
+    <h1 class="page-title">CKA 매일 실습</h1>
+    <p class="page-sub">공식 커리큘럼(Kubernetes v1.37)과 KodeKloud 강의 노트를 바탕으로 매일 실기형 문제를 풉니다.</p>
+
+    <div class="hero">
+      <section class="card today" id="today" aria-live="polite"><div class="empty">불러오는 중…</div></section>
+      <section class="card">
+        <h2>시험까지</h2>
+        <div class="dday">
+          <div id="dday"></div>
+          <label class="small muted">시험일 <input type="date" id="exam-date"></label>
+        </div>
+        <div class="routine">
+          <h3>하루 루틴 (약 1시간)</h3>
+          <ol>
+            <li>그날 Day 의 강의 노트 읽기 15~20분</li>
+            <li>타이머 켜고 정답 보지 않고 풀기 30~40분</li>
+            <li>틀린 문제를 공식 문서에서 다시 찾기 10분</li>
+          </ol>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid grid-2">
+      <section class="card">
+        <h2>진행 현황</h2>
+        <div id="progress"></div>
+      </section>
+      <section class="card">
+        <h2>다음 예정</h2>
+        <div id="upcoming"></div>
+        <h2 style="margin-top:22px">다시 볼 문제</h2>
+        <div id="flagged"></div>
+      </section>
+    </div>
+
+    <section style="margin-top:24px">
+      <h2 style="font-size:18px">전체 Day</h2>
+      <div class="day-list" id="day-list"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    진도·시험일은 이 브라우저에만 저장됩니다. · 문제는 Claude 가 매일 생성합니다.
+  </footer>
+  <script src="assets/app.js"></script>
+</body>
+</html>

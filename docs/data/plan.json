@@ -1,0 +1,610 @@
+{
+  "kodekloud_base": "https://notes.kodekloud.com/docs/Certified-Kubernetes-Administrator-CKA/",
+  "practice": {
+    "default": "Killercoda CKA Playground (무료, 브라우저에서 kubeadm 클러스터 제공)",
+    "url": "https://killercoda.com/playgrounds/scenario/cka"
+  },
+  "daily_format": "일반 Day: 오늘 주제 3문제 + 오늘 주제 트러블슈팅 1문제 + 이전 주제 복습 1문제 = 5문제 (약 30~40분). 모의고사 Day: 도메인 비중대로 17문제, 120분.",
+  "days": [
+    {
+      "day": 1,
+      "title": "클러스터 아키텍처와 Pod",
+      "section": "Core Concepts",
+      "domains": ["cluster", "workloads"],
+      "topics": ["컨트롤 플레인/워커 노드 구성요소의 역할", "static pod 매니페스트 위치(/etc/kubernetes/manifests)와 kube-system Pod", "crictl 로 컨테이너 확인", "kubectl run, --dry-run=client -o yaml", "Pod 라벨·이미지 확인과 수정", "kubectl explain"],
+      "lessons": [
+        {"title": "Cluster Architecture", "path": "Core-Concepts/Cluster-Architecture"},
+        {"title": "Docker vs ContainerD", "path": "Core-Concepts/Docker-vs-ContainerD"},
+        {"title": "etcd in Kubernetes", "path": "Core-Concepts/etcd-in-Kubernetes"},
+        {"title": "Kube API Server", "path": "Core-Concepts/Kube-API-Server"},
+        {"title": "Kube Controller Manager", "path": "Core-Concepts/Kube-Controller-Manager"},
+        {"title": "Kube Scheduler", "path": "Core-Concepts/Kube-Scheduler"},
+        {"title": "Kubelet", "path": "Core-Concepts/Kubelet"},
+        {"title": "Kube Proxy", "path": "Core-Concepts/Kube-Proxy"},
+        {"title": "Pods", "path": "Core-Concepts/Pods"},
+        {"title": "Pods With YAML", "path": "Core-Concepts/Pods-With-YAML"}
+      ],
+      "docs": [
+        {"title": "Kubernetes Components", "url": "https://kubernetes.io/docs/concepts/overview/components/"},
+        {"title": "Pods", "url": "https://kubernetes.io/docs/concepts/workloads/pods/"},
+        {"title": "kubectl Quick Reference", "url": "https://kubernetes.io/docs/reference/kubectl/quick-reference/"},
+        {"title": "Debugging Kubernetes nodes with crictl", "url": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/"}
+      ]
+    },
+    {
+      "day": 2,
+      "title": "ReplicaSet · Deployment · Service · Namespace",
+      "section": "Core Concepts",
+      "domains": ["workloads", "networking"],
+      "topics": ["ReplicaSet selector 와 template 라벨 일치", "Deployment 생성·스케일", "kubectl expose 로 ClusterIP/NodePort Service", "Namespace 와 서비스 DNS(<svc>.<ns>.svc.cluster.local)", "명령형 vs 선언형, kubectl apply"],
+      "lessons": [
+        {"title": "ReplicaSets", "path": "Core-Concepts/ReplicaSets"},
+        {"title": "Deployments", "path": "Core-Concepts/Deployments"},
+        {"title": "Services", "path": "Core-Concepts/Services"},
+        {"title": "Services Cluster IP", "path": "Core-Concepts/Services-Cluster-IP"},
+        {"title": "Services Loadbalancer", "path": "Core-Concepts/Services-Loadbalancer"},
+        {"title": "Namespaces", "path": "Core-Concepts/Namespaces"},
+        {"title": "Imperative vs Declarative", "path": "Core-Concepts/Imperative-vs-Declarative"},
+        {"title": "Kubectl Explain Command", "path": "Core-Concepts/Kubectl-Explain-Command"},
+        {"title": "Kubectl Apply Command", "path": "Core-Concepts/Kubectl-Apply-Command"}
+      ],
+      "docs": [
+        {"title": "ReplicaSet", "url": "https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/"},
+        {"title": "Deployments", "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"},
+        {"title": "Service", "url": "https://kubernetes.io/docs/concepts/services-networking/service/"},
+        {"title": "Namespaces", "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"},
+        {"title": "Managing Kubernetes Objects Using Imperative Commands", "url": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-command/"}
+      ]
+    },
+    {
+      "day": 3,
+      "title": "수동 스케줄링 · 라벨 · 테인트",
+      "section": "Scheduling",
+      "domains": ["workloads"],
+      "topics": ["nodeName 으로 수동 스케줄링(스케줄러가 없을 때)", "라벨 셀렉터 조회(-l, set-based)", "taint 추가/삭제와 effect(NoSchedule/PreferNoSchedule/NoExecute)", "toleration 작성", "nodeSelector"],
+      "lessons": [
+        {"title": "Manual Scheduling", "path": "Scheduling/Manual-Scheduling"},
+        {"title": "Labels and Selectors", "path": "Scheduling/Labels-and-Selectors"},
+        {"title": "Taints and Tolerations", "path": "Scheduling/Taints-and-Tolerations"},
+        {"title": "Node Selectors", "path": "Scheduling/Node-Selectors"}
+      ],
+      "docs": [
+        {"title": "Assigning Pods to Nodes", "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/"},
+        {"title": "Labels and Selectors", "url": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/"},
+        {"title": "Taints and Tolerations", "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/"}
+      ]
+    },
+    {
+      "day": 4,
+      "title": "노드 어피니티 · 리소스 요청과 제한",
+      "section": "Scheduling",
+      "domains": ["workloads"],
+      "topics": ["requiredDuringScheduling / preferredDuringScheduling 어피니티", "연산자 In, NotIn, Exists", "테인트 + 어피니티 조합으로 전용 노드 만들기", "requests/limits, OOMKilled 진단", "LimitRange, ResourceQuota"],
+      "lessons": [
+        {"title": "Node Affinity", "path": "Scheduling/Node-Affinity"},
+        {"title": "Taints and Tolerations vs Node Affinity", "path": "Scheduling/Taints-and-Tolerations-vs-Node-Affinity"},
+        {"title": "Resource Requirements", "path": "Scheduling/Resource-Requirements"},
+        {"title": "Lab Solution Resource Limits", "path": "Scheduling/Lab-Solution-Resource-Limits"}
+      ],
+      "docs": [
+        {"title": "Assigning Pods to Nodes (affinity)", "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/"},
+        {"title": "Resource Management for Pods and Containers", "url": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"},
+        {"title": "Limit Ranges", "url": "https://kubernetes.io/docs/concepts/policy/limit-range/"},
+        {"title": "Resource Quotas", "url": "https://kubernetes.io/docs/concepts/policy/resource-quotas/"}
+      ]
+    },
+    {
+      "day": 5,
+      "title": "DaemonSet · Static Pod · PriorityClass · 스케줄러",
+      "section": "Scheduling",
+      "domains": ["workloads", "cluster"],
+      "topics": ["DaemonSet 작성(Deployment dry-run 변형)", "static pod 경로(kubelet config 의 staticPodPath)와 생성/삭제", "PriorityClass 와 선점(preemption)", "다중 스케줄러와 schedulerName", "스케줄러 프로파일"],
+      "lessons": [
+        {"title": "DaemonSets", "path": "Scheduling/DaemonSets"},
+        {"title": "Static Pods", "path": "Scheduling/Static-Pods"},
+        {"title": "Lab Solution Static Pods", "path": "Scheduling/Lab-Solution-Static-Pods-Optional"},
+        {"title": "Priority Classes", "path": "Scheduling/Priority-Classes"},
+        {"title": "Multiple Schedulers", "path": "Scheduling/Multiple-Schedulers"},
+        {"title": "Configuring Scheduler Profiles", "path": "Scheduling/Configuring-Scheduler-Profiles"}
+      ],
+      "docs": [
+        {"title": "DaemonSet", "url": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/"},
+        {"title": "Create static Pods", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/"},
+        {"title": "Pod Priority and Preemption", "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/"},
+        {"title": "Configure Multiple Schedulers", "url": "https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/"}
+      ]
+    },
+    {
+      "day": 6,
+      "title": "어드미션 컨트롤러",
+      "section": "Scheduling",
+      "domains": ["cluster", "workloads"],
+      "topics": ["API 요청 흐름: 인증 → 인가 → 어드미션", "kube-apiserver static pod 의 --enable/--disable-admission-plugins 수정", "NamespaceLifecycle, NamespaceAutoProvision 동작", "Validating/Mutating 웹훅 구성 구조", "수정 후 apiserver 재기동 확인(crictl)"],
+      "lessons": [
+        {"title": "Admission Controllers (2025)", "path": "Scheduling/2025-Updates-Admission-Controllers"},
+        {"title": "Lab Solution Admission Controllers", "path": "Scheduling/2025-Updates-Lab-Solution-Admission-Controllers"},
+        {"title": "Validating and Mutating Admission Controllers", "path": "Scheduling/2025-Updates-Validating-and-Mutating-Admission-Controllers"}
+      ],
+      "docs": [
+        {"title": "Admission Control in Kubernetes", "url": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/"},
+        {"title": "Dynamic Admission Control", "url": "https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/"}
+      ]
+    },
+    {
+      "day": 7,
+      "title": "로깅 · 모니터링 + 1주차 복습",
+      "section": "Logging & Monitoring",
+      "domains": ["troubleshooting"],
+      "topics": ["metrics-server 와 kubectl top (--sort-by, -A, --containers)", "kubectl logs -c, --previous, -f, --tail, -l", "이벤트 정렬(kubectl events, --sort-by)", "결과를 지정 파일로 저장하는 출제 패턴"],
+      "lessons": [
+        {"title": "Monitoring Cluster Components", "path": "Logging-Monitoring/Monitoring-Cluster-Components"},
+        {"title": "Lab Solution Monitor Cluster Components", "path": "Logging-Monitoring/Lab-Solution-Monitor-Cluster-Components"},
+        {"title": "Managing Application Logs", "path": "Logging-Monitoring/Managing-Application-Logs"},
+        {"title": "Lab Solution Logging", "path": "Logging-Monitoring/Lab-Solution-Logging-Optional"}
+      ],
+      "docs": [
+        {"title": "Resource metrics pipeline", "url": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/"},
+        {"title": "Logging Architecture", "url": "https://kubernetes.io/docs/concepts/cluster-administration/logging/"}
+      ]
+    },
+    {
+      "day": 8,
+      "title": "롤링 업데이트 · 롤백 · command/args",
+      "section": "Application Lifecycle Management",
+      "domains": ["workloads"],
+      "topics": ["kubectl set image, rollout status/history/undo --to-revision", "RollingUpdate(maxSurge/maxUnavailable) vs Recreate", "change-cause 어노테이션", "Dockerfile ENTRYPOINT/CMD ↔ command/args"],
+      "lessons": [
+        {"title": "Rolling Updates and Rollbacks", "path": "Application-Lifecycle-Management/Rolling-Updates-and-Rollbacks"},
+        {"title": "Lab Solution Rolling update", "path": "Application-Lifecycle-Management/Lab-Solution-Rolling-update"},
+        {"title": "Commands and Arguments in Docker", "path": "Application-Lifecycle-Management/Commands-and-Arguments-in-Docker"},
+        {"title": "Commands and Arguments in Kubernetes", "path": "Application-Lifecycle-Management/Commands-and-Arguments-in-Kubernetes"}
+      ],
+      "docs": [
+        {"title": "Deployments (rolling back)", "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"},
+        {"title": "Define a Command and Arguments for a Container", "url": "https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/"}
+      ]
+    },
+    {
+      "day": 9,
+      "title": "환경 변수 · ConfigMap · Secret · 저장 시 암호화",
+      "section": "Application Lifecycle Management",
+      "domains": ["workloads", "cluster"],
+      "topics": ["create configmap/secret --from-literal/--from-file", "env.valueFrom, envFrom, 볼륨 마운트", "Secret base64 인코딩/디코딩", "EncryptionConfiguration 과 --encryption-provider-config"],
+      "lessons": [
+        {"title": "Configuring Environment Variables in Applications", "path": "Application-Lifecycle-Management/Configuring-Environment-Variables-in-Applications"},
+        {"title": "Configuring ConfigMaps in Applications", "path": "Application-Lifecycle-Management/Configuring-ConfigMaps-in-Applications"},
+        {"title": "Secrets", "path": "Application-Lifecycle-Management/Secrets"},
+        {"title": "Lab Solution Secrets", "path": "Application-Lifecycle-Management/Lab-Solution-Secrets-Optional"},
+        {"title": "Demo Encrypting Secret Data at Rest", "path": "Application-Lifecycle-Management/Demo-Encrypting-Secret-Data-at-Rest"}
+      ],
+      "docs": [
+        {"title": "ConfigMaps", "url": "https://kubernetes.io/docs/concepts/configuration/configmap/"},
+        {"title": "Configure a Pod to Use a ConfigMap", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/"},
+        {"title": "Secrets", "url": "https://kubernetes.io/docs/concepts/configuration/secret/"},
+        {"title": "Encrypting Confidential Data at Rest", "url": "https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/"}
+      ]
+    },
+    {
+      "day": 10,
+      "title": "멀티 컨테이너 · Init · Sidecar · Probe",
+      "section": "Application Lifecycle Management",
+      "domains": ["workloads", "troubleshooting"],
+      "topics": ["emptyDir 공유 멀티 컨테이너 Pod", "initContainers 순차 실행과 실패 디버깅", "네이티브 사이드카(initContainers + restartPolicy: Always)", "liveness/readiness/startup probe"],
+      "lessons": [
+        {"title": "Multi Container Pods", "path": "Application-Lifecycle-Management/Multi-Container-Pods"},
+        {"title": "Multi Container Pods Design Patterns", "path": "Application-Lifecycle-Management/Multi-Container-Pods-Design-Patterns"},
+        {"title": "Lab Solution Init Containers", "path": "Application-Lifecycle-Management/Lab-Solution-Init-Containers-Optional"}
+      ],
+      "docs": [
+        {"title": "Init Containers", "url": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/"},
+        {"title": "Sidecar Containers", "url": "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/"},
+        {"title": "Configure Liveness, Readiness and Startup Probes", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/"}
+      ]
+    },
+    {
+      "day": 11,
+      "title": "오토스케일링: HPA · VPA · In-place Resize",
+      "section": "Application Lifecycle Management",
+      "domains": ["workloads"],
+      "topics": ["kubectl autoscale 와 autoscaling/v2 HPA YAML", "behavior(scaleDown stabilizationWindowSeconds)", "HPA 가 동작하려면 requests 필요", "VPA updateMode", "Pod 리소스 in-place resize(resizePolicy)"],
+      "lessons": [
+        {"title": "Introduction to Autoscaling (2025)", "path": "Application-Lifecycle-Management/Introduction-to-Autoscaling-2025-Updates"},
+        {"title": "Horizontal Pod Autoscaler HPA (2025)", "path": "Application-Lifecycle-Management/Horizontal-Pod-Autoscaler-HPA-2025-Updates"},
+        {"title": "In place Resize of Pods (2025)", "path": "Application-Lifecycle-Management/In-place-Resize-of-Pods-2025-Updates"},
+        {"title": "Vertical Pod Autoscaling VPA (2025)", "path": "Application-Lifecycle-Management/Vertical-Pod-Autoscaling-VPA-2025-Updates"}
+      ],
+      "docs": [
+        {"title": "Autoscaling Workloads", "url": "https://kubernetes.io/docs/concepts/workloads/autoscaling/"},
+        {"title": "Horizontal Pod Autoscaling", "url": "https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/"},
+        {"title": "HorizontalPodAutoscaler Walkthrough", "url": "https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/"},
+        {"title": "Resize CPU and Memory Resources assigned to Containers", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/"}
+      ]
+    },
+    {
+      "day": 12,
+      "title": "노드 유지보수: cordon · drain · PDB",
+      "section": "Cluster Maintenance",
+      "domains": ["cluster"],
+      "topics": ["kubectl cordon/drain/uncordon", "drain 옵션: --ignore-daemonsets, --delete-emptydir-data, --force", "컨트롤러 없는 Pod 가 drain 을 막는 경우", "PodDisruptionBudget", "릴리스 버전 체계"],
+      "lessons": [
+        {"title": "OS Upgrades", "path": "Cluster-Maintenance/OS-Upgrades"},
+        {"title": "Lab Solution OS Upgrades", "path": "Cluster-Maintenance/Lab-Solution-OS-Upgrades-optional"},
+        {"title": "Kubernetes Releases", "path": "Cluster-Maintenance/Kubernetes-Releases"}
+      ],
+      "docs": [
+        {"title": "Safely Drain a Node", "url": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/"},
+        {"title": "Specifying a Disruption Budget for your Application", "url": "https://kubernetes.io/docs/tasks/run-application/configure-pdb/"},
+        {"title": "Version Skew Policy", "url": "https://kubernetes.io/releases/version-skew-policy/"}
+      ]
+    },
+    {
+      "day": 13,
+      "title": "kubeadm 클러스터 업그레이드",
+      "section": "Cluster Maintenance",
+      "domains": ["cluster"],
+      "topics": ["pkgs.k8s.io 저장소의 마이너 버전 변경", "kubeadm upgrade plan / apply (컨트롤 플레인)", "kubeadm upgrade node (워커)", "kubelet·kubectl 업그레이드와 재시작", "drain → 업그레이드 → uncordon 순서, 버전 스큐"],
+      "lessons": [
+        {"title": "Cluster Upgrade Introduction", "path": "Cluster-Maintenance/Cluster-Upgrade-Introduction"},
+        {"title": "Demo Cluster Upgrade", "path": "Cluster-Maintenance/Demo-Cluster-Upgrade"},
+        {"title": "Lab Solution Cluster Upgrade Process", "path": "Cluster-Maintenance/Lab-Solution-Cluster-Upgrade-Process"}
+      ],
+      "docs": [
+        {"title": "Upgrading kubeadm clusters", "url": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/"},
+        {"title": "Version Skew Policy", "url": "https://kubernetes.io/releases/version-skew-policy/"}
+      ]
+    },
+    {
+      "day": 14,
+      "title": "etcd 백업 · 복구 + 2주차 복습",
+      "section": "Cluster Maintenance",
+      "domains": ["cluster", "troubleshooting"],
+      "topics": ["etcdctl snapshot save (--endpoints, --cacert, --cert, --key)", "etcdutl snapshot status / restore --data-dir", "etcd static pod 의 hostPath 를 새 data-dir 로 변경", "리소스 매니페스트 백업"],
+      "lessons": [
+        {"title": "Backup and Restore Methods", "path": "Cluster-Maintenance/Backup-and-Restore-Methods"},
+        {"title": "etcd in Kubernetes", "path": "Core-Concepts/etcd-in-Kubernetes"}
+      ],
+      "docs": [
+        {"title": "Operating etcd clusters for Kubernetes", "url": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/"}
+      ]
+    },
+    {
+      "day": 15,
+      "title": "TLS 인증서 점검",
+      "section": "Security",
+      "domains": ["cluster", "troubleshooting"],
+      "topics": ["클러스터 인증서 위치(/etc/kubernetes/pki)와 용도", "openssl x509 -in <crt> -text -noout 으로 SAN·발급자·만료일 확인", "kubeadm certs check-expiration / renew", "잘못된 인증서 경로로 죽은 apiserver/etcd 복구"],
+      "lessons": [
+        {"title": "TLS in Kubernetes", "path": "Security/TLS-in-Kubernetes"},
+        {"title": "TLS in Kubernetes Certificate Creation", "path": "Security/TLS-in-Kubernetes-Certificate-Creation"},
+        {"title": "View Certificate Details", "path": "Security/View-Certificate-Details"},
+        {"title": "Lab Solution View Certification Details", "path": "Security/Lab-Solution-View-Certification-Details"}
+      ],
+      "docs": [
+        {"title": "PKI certificates and requirements", "url": "https://kubernetes.io/docs/setup/best-practices/certificates/"},
+        {"title": "Certificate Management with kubeadm", "url": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/"}
+      ]
+    },
+    {
+      "day": 16,
+      "title": "Certificates API · kubeconfig",
+      "section": "Security",
+      "domains": ["cluster"],
+      "topics": ["openssl 로 키/CSR 생성 → CertificateSigningRequest(signerName, usages)", "kubectl certificate approve/deny, 발급 인증서 추출", "kubeconfig 구조(clusters/users/contexts)", "config set-credentials / set-context / use-context, --kubeconfig"],
+      "lessons": [
+        {"title": "Certificates API", "path": "Security/Certificates-API"},
+        {"title": "Lab Solution Certificates API", "path": "Security/Lab-Solution-Certificates-API"},
+        {"title": "KubeConfig", "path": "Security/KubeConfig"},
+        {"title": "Lab Solution KubeConfig", "path": "Security/Lab-Solution-KubeConfig"}
+      ],
+      "docs": [
+        {"title": "Certificates and Certificate Signing Requests", "url": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/"},
+        {"title": "Organizing Cluster Access Using kubeconfig Files", "url": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/"},
+        {"title": "Configure Access to Multiple Clusters", "url": "https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/"}
+      ]
+    },
+    {
+      "day": 17,
+      "title": "RBAC: Role · RoleBinding",
+      "section": "Security",
+      "domains": ["cluster"],
+      "topics": ["API 그룹과 리소스(kubectl api-resources)", "인가 모드(Node, RBAC)", "kubectl create role --verb --resource --resource-name", "rolebinding --user/--group/--serviceaccount", "kubectl auth can-i --as, --list"],
+      "lessons": [
+        {"title": "API Groups", "path": "Security/API-Groups"},
+        {"title": "Authorization", "path": "Security/Authorization"},
+        {"title": "Role Based Access Controls", "path": "Security/Role-Based-Access-Controls"},
+        {"title": "Lab Role Based Access Controls", "path": "Security/Lab-Role-Based-Access-Controls"}
+      ],
+      "docs": [
+        {"title": "Authorization", "url": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/"},
+        {"title": "Using RBAC Authorization", "url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/"}
+      ]
+    },
+    {
+      "day": 18,
+      "title": "ClusterRole · ServiceAccount · 이미지 보안",
+      "section": "Security",
+      "domains": ["cluster"],
+      "topics": ["클러스터 범위 리소스(nodes, storageclasses, pv)용 ClusterRole/Binding", "ServiceAccount 생성과 Pod/Deployment 지정", "kubectl create token, automountServiceAccountToken", "docker-registry Secret 과 imagePullSecrets"],
+      "lessons": [
+        {"title": "Cluster Roles", "path": "Security/Cluster-Roles"},
+        {"title": "Lab Solution Cluster Roles", "path": "Security/Lab-Solution-Cluster-Roles"},
+        {"title": "Service Accounts", "path": "Security/Service-Accounts"},
+        {"title": "Lab Solution Service Accounts", "path": "Security/Lab-Solution-Service-Accounts"},
+        {"title": "Image Security", "path": "Security/Image-Security"},
+        {"title": "Lab Solution Image Security", "path": "Security/Lab-Solution-Image-Security"}
+      ],
+      "docs": [
+        {"title": "Using RBAC Authorization (ClusterRole)", "url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/"},
+        {"title": "Service Accounts", "url": "https://kubernetes.io/docs/concepts/security/service-accounts/"},
+        {"title": "Configure Service Accounts for Pods", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/"},
+        {"title": "Pull an Image from a Private Registry", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/"}
+      ]
+    },
+    {
+      "day": 19,
+      "title": "Security Context · NetworkPolicy",
+      "section": "Security",
+      "domains": ["networking", "cluster"],
+      "topics": ["runAsUser/runAsGroup/fsGroup, capabilities add, readOnlyRootFilesystem", "Pod 레벨 vs 컨테이너 레벨 securityContext 우선순위", "NetworkPolicy podSelector/namespaceSelector/ipBlock/ports", "default deny 와 egress DNS(53) 허용"],
+      "lessons": [
+        {"title": "Security Contexts", "path": "Security/Security-Contexts"},
+        {"title": "Lab Solution Security Contexts", "path": "Security/Lab-Solution-Security-Contexts"},
+        {"title": "Network Policies", "path": "Security/Network-Policies"},
+        {"title": "Developing Network Policies", "path": "Security/Developing-Network-Policies"},
+        {"title": "Lab Solution Network Policies", "path": "Security/Lab-Solution-Network-Policies-optional"}
+      ],
+      "docs": [
+        {"title": "Configure a Security Context for a Pod or Container", "url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"},
+        {"title": "Network Policies", "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/"}
+      ]
+    },
+    {
+      "day": 20,
+      "title": "CRD · Operator",
+      "section": "Security",
+      "domains": ["cluster"],
+      "topics": ["CRD 작성(group, versions, scope, names, openAPIV3Schema)", "커스텀 리소스 생성·조회, kubectl explain", "컨트롤러/오퍼레이터 패턴", "오퍼레이터 설치 후 CR 로 관리"],
+      "lessons": [
+        {"title": "Custom Resource Definition CRD (2025)", "path": "Security/2025-Updates-Custom-Resource-Definition-CRD"},
+        {"title": "Custom Controllers (2025)", "path": "Security/2025-Updates-Custom-Controllers"},
+        {"title": "Operator Framework (2025)", "path": "Security/2025-Updates-Operator-Framework"}
+      ],
+      "docs": [
+        {"title": "Custom Resources", "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/"},
+        {"title": "Extend the Kubernetes API with CustomResourceDefinitions", "url": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/"},
+        {"title": "Operator pattern", "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/operator/"}
+      ]
+    },
+    {
+      "day": 21,
+      "title": "Volume · PersistentVolume · PVC",
+      "section": "Storage",
+      "domains": ["storage"],
+      "topics": ["emptyDir, hostPath", "PV: capacity, accessModes, persistentVolumeReclaimPolicy, storageClassName", "PVC 가 Pending 인 원인(용량/accessMode/SC 불일치)", "Pod 에 PVC 마운트, Released PV 재사용"],
+      "lessons": [
+        {"title": "Volumes", "path": "Storage/Volumes"},
+        {"title": "Persistent Volumes", "path": "Storage/Persistent-Volumes"},
+        {"title": "Persistent Volume Claims", "path": "Storage/Persistent-Volume-Claims"},
+        {"title": "Lab Solution PV and PVC", "path": "Storage/Lab-Solution-Persistent-Volumes-and-Persistent-Volume-Claims-optional"}
+      ],
+      "docs": [
+        {"title": "Volumes", "url": "https://kubernetes.io/docs/concepts/storage/volumes/"},
+        {"title": "Persistent Volumes", "url": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/"},
+        {"title": "Configure a Pod to Use a PersistentVolume for Storage", "url": "https://kubernetes.io/docs/tutorials/configuration/configure-persistent-volume-storage/"}
+      ]
+    },
+    {
+      "day": 22,
+      "title": "StorageClass · 동적 프로비저닝",
+      "section": "Storage",
+      "domains": ["storage", "cluster"],
+      "topics": ["StorageClass: provisioner, reclaimPolicy, volumeBindingMode, allowVolumeExpansion", "WaitForFirstConsumer 와 바인딩 시점", "기본 StorageClass 어노테이션 변경", "PVC 용량 확장", "CSI 개념"],
+      "lessons": [
+        {"title": "Container Storage Interface", "path": "Storage/Container-Storage-Interface"},
+        {"title": "Storage Class", "path": "Storage/Storage-Class"},
+        {"title": "Lab Solution Storage Class", "path": "Storage/Lab-Solution-Storage-Class"}
+      ],
+      "docs": [
+        {"title": "Storage Classes", "url": "https://kubernetes.io/docs/concepts/storage/storage-classes/"},
+        {"title": "Dynamic Volume Provisioning", "url": "https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/"},
+        {"title": "Change the default StorageClass", "url": "https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/"}
+      ]
+    },
+    {
+      "day": 23,
+      "title": "클러스터 · Pod 네트워킹과 CNI",
+      "section": "Networking",
+      "domains": ["networking", "cluster"],
+      "topics": ["노드 IP·인터페이스·필수 포트(6443, 2379-2380, 10250 등)", "CNI 설정(/etc/cni/net.d)과 바이너리(/opt/cni/bin)", "Pod CIDR 과 Service CIDR(--service-cluster-ip-range) 찾기", "kube-proxy 모드 확인"],
+      "lessons": [
+        {"title": "Cluster Networking", "path": "Networking/Cluster-Networking"},
+        {"title": "Lab Solution Explore Environment", "path": "Networking/Lab-Solution-Explore-Environment-optional"},
+        {"title": "Pod Networking", "path": "Networking/Pod-Networking"},
+        {"title": "CNI in kubernetes", "path": "Networking/CNI-in-kubernetes"},
+        {"title": "Lab Solution Explore CNI", "path": "Networking/Lab-Solution-Explore-CNI-optional"},
+        {"title": "Service Networking", "path": "Networking/Service-Networking"},
+        {"title": "Lab Solution Service Networking", "path": "Networking/Lab-Solution-Service-Networking-optional"}
+      ],
+      "docs": [
+        {"title": "Cluster Networking", "url": "https://kubernetes.io/docs/concepts/cluster-administration/networking/"},
+        {"title": "Ports and Protocols", "url": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/"},
+        {"title": "Network Plugins", "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/"}
+      ]
+    },
+    {
+      "day": 24,
+      "title": "Service · EndpointSlice · CoreDNS",
+      "section": "Networking",
+      "domains": ["networking", "troubleshooting"],
+      "topics": ["ClusterIP/NodePort/LoadBalancer 와 nodePort 지정", "Endpoints/EndpointSlice 가 비는 원인(셀렉터, readiness)", "서비스/Pod DNS 이름과 nslookup", "CoreDNS Corefile ConfigMap"],
+      "lessons": [
+        {"title": "DNS in kubernetes", "path": "Networking/DNS-in-kubernetes"},
+        {"title": "CoreDNS in Kubernetes", "path": "Networking/CoreDNS-in-Kubernetes"},
+        {"title": "Lab Solution Explore DNS", "path": "Networking/Lab-Solution-Explore-DNS-optional"}
+      ],
+      "docs": [
+        {"title": "Service", "url": "https://kubernetes.io/docs/concepts/services-networking/service/"},
+        {"title": "EndpointSlices", "url": "https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/"},
+        {"title": "DNS for Services and Pods", "url": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/"},
+        {"title": "Customizing DNS Service", "url": "https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/"},
+        {"title": "Debugging DNS Resolution", "url": "https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/"}
+      ]
+    },
+    {
+      "day": 25,
+      "title": "Ingress · Gateway API",
+      "section": "Networking",
+      "domains": ["networking"],
+      "topics": ["Ingress: ingressClassName, host, pathType(Prefix/Exact), rewrite 어노테이션", "IngressClass 와 컨트롤러", "Gateway API: GatewayClass, Gateway, HTTPRoute(parentRefs, backendRefs)", "가중치 기반 트래픽 분할, Ingress → Gateway 전환"],
+      "lessons": [
+        {"title": "Ingress", "path": "Networking/Ingress"},
+        {"title": "Lab Solution Ingress Networking 1", "path": "Networking/Lab-Solution-Ingress-Networking-1-optional"},
+        {"title": "Lab Solution Ingress Networking 2", "path": "Networking/Lab-Solution-Ingress-Networking-2-optional"},
+        {"title": "Introduction to Gateway API (2025)", "path": "Networking/Introduction-to-Gateway-API-2025-Updates"}
+      ],
+      "docs": [
+        {"title": "Ingress", "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/"},
+        {"title": "Ingress Controllers", "url": "https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/"},
+        {"title": "Gateway API (Kubernetes docs)", "url": "https://kubernetes.io/docs/concepts/services-networking/gateway/"},
+        {"title": "Gateway API: HTTP routing", "url": "https://gateway-api.sigs.k8s.io/guides/http-routing/"},
+        {"title": "Gateway API: Traffic splitting", "url": "https://gateway-api.sigs.k8s.io/guides/traffic-splitting/"}
+      ]
+    },
+    {
+      "day": 26,
+      "title": "클러스터 설계 · kubeadm 설치 · 고가용성",
+      "section": "Design and Install / kubeadm",
+      "domains": ["cluster"],
+      "topics": ["노드 준비: swap, overlay/br_netfilter 모듈, net.ipv4.ip_forward", "containerd 설정(SystemdCgroup)과 crictl", "kubeadm init 옵션(--pod-network-cidr, --apiserver-advertise-address)과 CNI 설치", "kubeadm token create --print-join-command 로 워커 조인", "HA 토폴로지(stacked/external etcd)와 quorum"],
+      "lessons": [
+        {"title": "Designing a Kubernetes Cluster", "path": "Design-and-Install-a-Kubernetes-Cluster/Designing-a-Kubernetes-Cluster"},
+        {"title": "Configuring High Availability", "path": "Design-and-Install-a-Kubernetes-Cluster/Configuring-High-Availability"},
+        {"title": "etcd in HA", "path": "Design-and-Install-a-Kubernetes-Cluster/etcd-in-HA"},
+        {"title": "Deployment With kubeadm Introduction", "path": "Install-Kubernetes-the-kubeadm-way/Deployment-With-kubeadm-Introduction"},
+        {"title": "Demo Deployment With Kubeadm", "path": "Install-Kubernetes-the-kubeadm-way/Demo-Deployment-With-Kubeadm"},
+        {"title": "Lab Solution Install a Kubernetes Cluster using kubeadm", "path": "Install-Kubernetes-the-kubeadm-way/Lab-Solution-Install-a-Kubernetes-Cluster-using-kubeadm"}
+      ],
+      "docs": [
+        {"title": "Installing kubeadm", "url": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/"},
+        {"title": "Creating a cluster with kubeadm", "url": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/"},
+        {"title": "Container Runtimes", "url": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/"},
+        {"title": "Options for Highly Available Topology", "url": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/"},
+        {"title": "Creating Highly Available Clusters with kubeadm", "url": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/"}
+      ]
+    },
+    {
+      "day": 27,
+      "title": "Helm + JSONPath",
+      "section": "Helm Basics / Other Topics",
+      "domains": ["cluster"],
+      "topics": ["helm repo add/update, search repo --versions", "helm install --version --set -f values.yaml -n --create-namespace", "helm upgrade / history / rollback / uninstall, helm template", "kubectl -o jsonpath, custom-columns, --sort-by"],
+      "lessons": [
+        {"title": "Helm Introduction", "path": "Helm-Basics-2025-Updates/Helm-Introduction"},
+        {"title": "Helm Components", "path": "Helm-Basics-2025-Updates/Helm-Components"},
+        {"title": "Helm charts", "path": "Helm-Basics-2025-Updates/Helm-charts"},
+        {"title": "Working with Helm basics", "path": "Helm-Basics-2025-Updates/Working-with-Helm-basics"},
+        {"title": "Customizing chart parameters", "path": "Helm-Basics-2025-Updates/Customizing-chart-parameters"},
+        {"title": "Lifecycle management with Helm", "path": "Helm-Basics-2025-Updates/Lifecycle-management-with-Helm"},
+        {"title": "JSON Path in Kubernetes", "path": "Other-Topics/JSON-Path-in-Kubernetes"}
+      ],
+      "docs": [
+        {"title": "Using Helm", "url": "https://helm.sh/docs/intro/using_helm/"},
+        {"title": "Helm Cheat Sheet", "url": "https://helm.sh/docs/intro/cheatsheet/"},
+        {"title": "JSONPath Support", "url": "https://kubernetes.io/docs/reference/kubectl/jsonpath/"}
+      ]
+    },
+    {
+      "day": 28,
+      "title": "Kustomize",
+      "section": "Kustomize Basics",
+      "domains": ["cluster"],
+      "topics": ["kustomization.yaml: resources, namespace, namePrefix, labels", "images 변환기", "patches(strategic merge / JSON 6902)", "base / overlays 구조, components", "kubectl kustomize, kubectl apply -k"],
+      "lessons": [
+        {"title": "Kustomize Problem Statement and Ideology", "path": "Kustomize-Basics-2025-Updates/Kustomize-Problem-Statement-and-Ideology"},
+        {"title": "The kustomization.yaml File", "path": "Kustomize-Basics-2025-Updates/The-kustomizationyaml-File"},
+        {"title": "Kustomize Output", "path": "Kustomize-Basics-2025-Updates/Kustomize-Output"},
+        {"title": "Common Transformers", "path": "Kustomize-Basics-2025-Updates/Common-Transformers"},
+        {"title": "Image Transformers", "path": "Kustomize-Basics-2025-Updates/Image-Transformers"},
+        {"title": "Different Types of Patches", "path": "Kustomize-Basics-2025-Updates/Different-Types-of-Patches"},
+        {"title": "Overlays", "path": "Kustomize-Basics-2025-Updates/Overlays"},
+        {"title": "Components", "path": "Kustomize-Basics-2025-Updates/Components"}
+      ],
+      "docs": [
+        {"title": "Declarative Management of Kubernetes Objects Using Kustomize", "url": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/"}
+      ]
+    },
+    {
+      "day": 29,
+      "title": "트러블슈팅 I: 애플리케이션 · 컨트롤 플레인",
+      "section": "Troubleshooting",
+      "domains": ["troubleshooting"],
+      "topics": ["Service selector/port/targetPort 불일치", "잘못된 env·Secret·이미지로 인한 실패", "static pod 매니페스트 오류(scheduler, controller-manager, apiserver)", "crictl ps -a / crictl logs, /var/log/pods"],
+      "lessons": [
+        {"title": "Application Failure", "path": "Troubleshooting/Application-Failure"},
+        {"title": "Lab Solution Application Failure", "path": "Troubleshooting/Lab-Solution-Application-Failure"},
+        {"title": "Control Plane Failure", "path": "Troubleshooting/Control-Plane-Failure"},
+        {"title": "Lab Solution Control Plane Failure", "path": "Troubleshooting/Lab-Solution-Control-Plane-Failure"}
+      ],
+      "docs": [
+        {"title": "Troubleshooting Applications", "url": "https://kubernetes.io/docs/tasks/debug/debug-application/"},
+        {"title": "Debug Pods", "url": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/"},
+        {"title": "Debug Services", "url": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/"},
+        {"title": "Troubleshooting Clusters", "url": "https://kubernetes.io/docs/tasks/debug/debug-cluster/"}
+      ]
+    },
+    {
+      "day": 30,
+      "title": "트러블슈팅 II: 워커 노드 · 네트워크",
+      "section": "Troubleshooting",
+      "domains": ["troubleshooting"],
+      "topics": ["NotReady 노드: systemctl status kubelet, journalctl -u kubelet", "/var/lib/kubelet/config.yaml, kubelet kubeconfig 오류", "kube-proxy · CoreDNS 장애", "kubectl debug 로 실행 중인 Pod/노드 점검"],
+      "lessons": [
+        {"title": "Worker Node Failure", "path": "Troubleshooting/Worker-Node-Failure"},
+        {"title": "Lab Solutions Worker Node Failure", "path": "Troubleshooting/Lab-Solutions-Worker-Node-Failure"},
+        {"title": "Network Troubleshooting", "path": "Troubleshooting/Network-Troubleshooting"}
+      ],
+      "docs": [
+        {"title": "Troubleshooting Clusters", "url": "https://kubernetes.io/docs/tasks/debug/debug-cluster/"},
+        {"title": "Debug Running Pods", "url": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/"},
+        {"title": "Debugging DNS Resolution", "url": "https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/"}
+      ]
+    },
+    {
+      "day": 31,
+      "title": "모의고사 1 (17문제 · 120분)",
+      "section": "Mock Exams",
+      "mock": true,
+      "domains": ["troubleshooting", "cluster", "networking", "workloads", "storage"],
+      "topics": ["도메인 비중대로 출제: Troubleshooting 5, Cluster 4, Networking 4, Workloads 2, Storage 2"],
+      "lessons": [
+        {"title": "Mock Exam 1 Step by Step Solutions", "path": "Mock-Exams/Mock-Exam-1-Step-by-Step-Solutions"}
+      ],
+      "docs": []
+    },
+    {
+      "day": 32,
+      "title": "모의고사 2 (17문제 · 120분)",
+      "section": "Mock Exams",
+      "mock": true,
+      "domains": ["troubleshooting", "cluster", "networking", "workloads", "storage"],
+      "topics": ["도메인 비중대로 출제, 모의고사 1에서 틀린 유형 재출제"],
+      "lessons": [
+        {"title": "Mock Exam 2 Step by Step Solutions", "path": "Mock-Exams/Mock-Exam-2-Step-by-Step-Solutions"}
+      ],
+      "docs": []
+    },
+    {
+      "day": 33,
+      "title": "모의고사 3 + 약점 정리",
+      "section": "Mock Exams",
+      "mock": true,
+      "domains": ["troubleshooting", "cluster", "networking", "workloads", "storage"],
+      "topics": ["도메인 비중대로 출제", "시험 당일 체크리스트"],
+      "lessons": [
+        {"title": "Mock Exam 3 Step by Step Solutions", "path": "Mock-Exams/Mock-Exam-3-Step-by-Step-Solutions"},
+        {"title": "Whats Next", "path": "Mock-Exams/Whats-Next"}
+      ],
+      "docs": []
+    }
+  ]
+}

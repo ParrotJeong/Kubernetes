@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-10-25T14:16:47Z",
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-10-25",
+      "title": "클러스터 아키텍처와 Pod",
+      "focus": "Core Concepts",
+      "summary": "컨트롤 플레인 구성요소가 어디서 어떻게 실행되는지 직접 확인하고, Pod 를 명령형·YAML 로 만들고 고치는 기본기를 익힙니다.",
+      "file": "days/day-001.md",
+      "problems": [
+        {
+          "id": "Q1",
+          "title": "컨트롤 플레인 구성요소 조사",
+          "domain": "cluster",
+          "level": 1,
+          "minutes": 5
+        },
+        {
+          "id": "Q2",
+          "title": "명령형으로 Pod 만들기",
+          "domain": "workloads",
+          "level": 1,
+          "minutes": 3
+        },
+        {
+          "id": "Q3",
+          "title": "dry-run YAML 로 컨테이너 2개짜리 Pod 만들기",
+          "domain": "workloads",
+          "level": 2,
+          "minutes": 7
+        },
+        {
+          "id": "Q4",
+          "title": "실행되지 않는 Pod 고치기",
+          "domain": "troubleshooting",
+          "level": 2,
+          "minutes": 7
+        },
+        {
+          "id": "Q5",
+          "title": "crictl 로 노드에서 컨테이너 확인하기",
+          "domain": "troubleshooting",
+          "level": 2,
+          "minutes": 6
+        }
+      ]
+    }
+  ]
+}

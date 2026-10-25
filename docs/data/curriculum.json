@@ -1,0 +1,106 @@
+{
+  "verified_at": "2026-10-25",
+  "exam": {
+    "name": "Certified Kubernetes Administrator (CKA)",
+    "k8s_version": "v1.37",
+    "format": "온라인 감독, 실기형(커맨드라인에서 실제 클러스터 작업)",
+    "duration_minutes": 120,
+    "tasks": "15~20개",
+    "passing_score": 66,
+    "result": "시험 종료 후 24시간 이내 이메일",
+    "includes": "재응시 1회, killer.sh 시뮬레이터 2회(각 36시간, 17문제)",
+    "validity": "2년",
+    "price_usd": 445,
+    "environment": [
+      "작업마다 지정된 호스트로 ssh <노드명> 접속 후 수행, 끝나면 exit (중첩 ssh 불가)",
+      "kubectl + k 별칭 + Bash 자동완성, yq, curl, wget, man 사용 가능",
+      "root 권한은 sudo -i 또는 sudo <명령>",
+      "터미널 복사/붙여넣기: Ctrl+Shift+C / Ctrl+Shift+V",
+      "Ctrl+W 대신 Ctrl+Alt+W (브라우저 탭이 닫히지 않도록)",
+      "Insert 키 비활성화: vi 에서는 i 로 입력 모드",
+      "base 노드는 절대 재부팅하지 않기"
+    ],
+    "allowed_docs": [
+      {"title": "Kubernetes Documentation", "url": "https://kubernetes.io/docs/"},
+      {"title": "Kubernetes Blog", "url": "https://kubernetes.io/blog/"},
+      {"title": "Helm Documentation", "url": "https://helm.sh/docs/"},
+      {"title": "Gateway API Documentation (CKA 전용)", "url": "https://gateway-api.sigs.k8s.io/"}
+    ],
+    "sources": [
+      {"title": "Linux Foundation — CKA 시험 페이지", "url": "https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/"},
+      {"title": "CKA/CKAD 시험 환경 안내 (Important Instructions)", "url": "https://docs.linuxfoundation.org/tc-docs/certification/tips-cka-and-ckad"},
+      {"title": "시험 중 허용 리소스", "url": "https://docs.linuxfoundation.org/tc-docs/certification/certification-resources-allowed"},
+      {"title": "CKA/CKAD/CKS FAQ", "url": "https://docs.linuxfoundation.org/tc-docs/certification/faq-cka-ckad-cks"},
+      {"title": "CNCF — CKA", "url": "https://www.cncf.io/training/certification/cka/"}
+    ]
+  },
+  "domains": [
+    {
+      "id": "troubleshooting",
+      "name": "Troubleshooting",
+      "ko": "트러블슈팅",
+      "weight": 30,
+      "competencies": [
+        "Troubleshoot clusters and nodes",
+        "Troubleshoot cluster components",
+        "Monitor cluster and application resource usage",
+        "Manage and evaluate container output streams",
+        "Troubleshoot services and networking"
+      ]
+    },
+    {
+      "id": "cluster",
+      "name": "Cluster Architecture, Installation & Configuration",
+      "ko": "클러스터 아키텍처·설치·구성",
+      "weight": 25,
+      "competencies": [
+        "Manage role based access control (RBAC)",
+        "Prepare underlying infrastructure for installing a Kubernetes cluster",
+        "Create and manage Kubernetes clusters using kubeadm",
+        "Manage the lifecycle of Kubernetes clusters",
+        "Implement and configure a highly-available control plane",
+        "Use Helm and Kustomize to install cluster components",
+        "Understand extension interfaces (CNI, CSI, CRI, etc.)",
+        "Understand CRDs, install and configure operators"
+      ]
+    },
+    {
+      "id": "networking",
+      "name": "Services & Networking",
+      "ko": "서비스·네트워킹",
+      "weight": 20,
+      "competencies": [
+        "Understand connectivity between Pods",
+        "Define and enforce Network Policies",
+        "Use ClusterIP, NodePort, LoadBalancer service types and endpoints",
+        "Use the Gateway API to manage Ingress traffic",
+        "Know how to use Ingress controllers and Ingress resources",
+        "Understand and use CoreDNS"
+      ]
+    },
+    {
+      "id": "workloads",
+      "name": "Workloads & Scheduling",
+      "ko": "워크로드·스케줄링",
+      "weight": 15,
+      "competencies": [
+        "Understand application deployments and how to perform rolling update and rollbacks",
+        "Use ConfigMaps and Secrets to configure applications",
+        "Configure workload autoscaling",
+        "Understand the primitives used to create robust, self-healing, application deployments",
+        "Configure Pod admission and scheduling (limits, node affinity, etc.)"
+      ]
+    },
+    {
+      "id": "storage",
+      "name": "Storage",
+      "ko": "스토리지",
+      "weight": 10,
+      "competencies": [
+        "Implement storage classes and dynamic volume provisioning",
+        "Configure volume types, access modes and reclaim policies",
+        "Manage persistent volumes and persistent volume claims"
+      ]
+    }
+  ]
+}

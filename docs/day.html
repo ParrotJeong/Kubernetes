@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CKA Daily — 문제</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23326ce5'/%3E%3Ctext x='16' y='22' font-size='15' font-family='Arial' font-weight='700' fill='white' text-anchor='middle'%3EK8s%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="day">
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="index.html"><span class="brand-mark">K</span><span class="label">CKA Daily</span></a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="index.html" data-nav="index">대시보드</a>
+        <a href="roadmap.html" data-nav="roadmap">로드맵</a>
+        <a href="guide.html" data-nav="guide">시험 가이드</a>
+      </nav>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="테마 전환">☾</button>
+    </div>
+  </header>
+
+  <main class="narrow" id="day">
+    <div class="day-head" id="day-head"><div class="empty">불러오는 중…</div></div>
+    <div class="day-tools">
+      <nav class="qnav" id="qnav" aria-label="문제 바로가기"></nav>
+      <div class="timer">
+        <button type="button" class="toggle-all" id="toggle-solutions">정답 모두 펼치기</button>
+        <span class="clock" id="timer-clock" aria-live="off">0:00</span>
+        <button type="button" id="timer-start">타이머 시작</button>
+        <button type="button" id="timer-reset" aria-label="타이머 초기화">↺</button>
+      </div>
+    </div>
+    <div id="day-content"></div>
+    <div class="pager" id="pager"></div>
+  </main>
+
+  <footer class="site-footer">완료 체크와 ‘다시 보기’ 표시는 이 브라우저에만 저장됩니다.</footer>
+  <script src="assets/vendor/marked.min.js"></script>
+  <script src="assets/vendor/highlight.min.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
