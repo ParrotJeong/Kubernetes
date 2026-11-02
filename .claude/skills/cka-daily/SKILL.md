@@ -172,6 +172,7 @@ Liquid 문법은 걱정하지 않아도 된다(`docs/.nojekyll` 로 Jekyll 을 �
    - YAML 블록: `python3 scripts/cka.py yaml <파일> <임시폴더>` 로 추출해서 완전한 매니페스트는 `kubectl apply --dry-run=server -f` 로 검사한다.
    - 샌드박스는 etcd + kube-apiserver + controller-manager + scheduler 와 가짜 kubelet(`scripts/fake_kubelet.py`)이다. 노드에 배정된 Pod 는 전부 Running/Ready 로 표시되므로 이미지 오류 같은 장애는 재현되지 않는다. `logs`/`exec`/`crictl`/`systemctl`/`journalctl`/`kubeadm`/`etcdctl snapshot`, in-place resize 는 검증할 수 없으니 공식 문서로 확인한다. etcd 는 `http://127.0.0.1:2379` 로 직접 볼 수 있다.
    - 다른 Day 의 리소스가 남아 헷갈리면 `scripts/sandbox.sh reset`.
+   - 샌드박스는 Linux(amd64/arm64) 전용이다. 사용자의 로컬 PC(macOS, WSL 이 아닌 Windows)에서 실행 중이라 띄울 수 없으면 `CLAUDE.md` 의 "로컬 PC 에서 작업할 때"를 따른다.
 2. **형식 검증 + manifest 갱신**: `python3 scripts/cka.py build` (`docs/days/manifest.json` 은 직접 고치지 않는다)
 3. **링크 검사**: `python3 scripts/cka.py check-links docs/study/day-NNN.md docs/days/day-NNN.md`
 4. (사이트 코드를 바꿨다면) `python3 -m http.server -d docs` 로 띄워 Playwright 로 콘솔 에러와 화면을 확인한다.

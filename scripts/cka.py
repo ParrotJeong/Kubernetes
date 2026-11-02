@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -285,7 +286,7 @@ def collect_links(files: list[Path]) -> list[str]:
 def http_status(url: str) -> str:
     try:
         out = subprocess.run(
-            ["curl", "-sS", "-o", "/dev/null", "-L", "--max-time", "25", "-w", "%{http_code}", url],
+            ["curl", "-sS", "-o", os.devnull, "-L", "--max-time", "25", "-w", "%{http_code}", url],
             capture_output=True, text=True, timeout=40,
         )
         return out.stdout.strip() or out.stderr.strip()[:80]

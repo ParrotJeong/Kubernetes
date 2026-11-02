@@ -12,6 +12,9 @@
 #   eval "$(scripts/sandbox.sh env)"   # KUBECONFIG / PATH 설정
 #   scripts/sandbox.sh reset    # etcd 데이터를 지우고 깨끗하게 재기동
 #   scripts/sandbox.sh down     # 종료
+#
+# Linux(amd64/arm64)에서만 동작한다. Kubernetes 서버 바이너리가 Linux 용으로만 배포되기 때문이다.
+# Windows 는 WSL2 안에서, macOS 는 Linux VM 이나 컨테이너 안에서 실행한다.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,6 +26,11 @@ RUN="$BASE/run"
 PKI="$RUN/pki"
 LOG="$RUN/logs"
 ADMIN_KUBECONFIG="$RUN/admin.kubeconfig"
+case "$(uname -m)" in
+  x86_64 | amd64) ARCH=amd64 ;;
+  aarch64 | arm64) ARCH=arm64 ;;
+  *) ARCH="$(uname -m)" ;;
+esac
 
 log() { printf '[sandbox] %s\n' "$*" >&2; }
 kc() { KUBECONFIG="$ADMIN_KUBECONFIG" "$BIN/kubectl" "$@"; }
@@ -33,26 +41,31 @@ fetch() { # url dest
 }
 
 download() {
+  if [ "$(uname -s)" != Linux ] || { [ "$ARCH" != amd64 ] && [ "$ARCH" != arm64 ]; }; then
+    log "Linux(amd64/arm64)에서만 동작합니다 (현재: $(uname -s)/$(uname -m))."
+    log "Windows 는 WSL2 안에서, macOS 는 Linux VM 이나 컨테이너 안에서 실행하세요."
+    exit 1
+  fi
   mkdir -p "$BIN"
   local b
   for b in kube-apiserver kube-controller-manager kube-scheduler kubectl; do
-    fetch "https://dl.k8s.io/release/$K8S_VERSION/bin/linux/amd64/$b" "$BIN/$b" &
+    fetch "https://dl.k8s.io/release/$K8S_VERSION/bin/linux/$ARCH/$b" "$BIN/$b" &
   done
-  fetch "https://storage.googleapis.com/etcd/$ETCD_VERSION/etcd-$ETCD_VERSION-linux-amd64.tar.gz" \
-    "$BASE/etcd-$ETCD_VERSION.tar.gz" &
+  fetch "https://storage.googleapis.com/etcd/$ETCD_VERSION/etcd-$ETCD_VERSION-linux-$ARCH.tar.gz" \
+    "$BASE/etcd-$ETCD_VERSION-$ARCH.tar.gz" &
   wait
   for b in kube-apiserver kube-controller-manager kube-scheduler kubectl; do
     [ -s "$BIN/$b" ] || { log "다운로드 실패: $b"; exit 1; }
     if [ ! -e "$BIN/$b.verified" ]; then
-      echo "$(curl -fsSL "https://dl.k8s.io/release/$K8S_VERSION/bin/linux/amd64/$b.sha256")  $BIN/$b" \
+      echo "$(curl -fsSL "https://dl.k8s.io/release/$K8S_VERSION/bin/linux/$ARCH/$b.sha256")  $BIN/$b" \
         | sha256sum -c --quiet - && touch "$BIN/$b.verified"
     fi
   done
   if [ ! -x "$BIN/etcd" ]; then
-    tar -xzf "$BASE/etcd-$ETCD_VERSION.tar.gz" -C "$BIN" --strip-components=1 \
-      "etcd-$ETCD_VERSION-linux-amd64/etcd" \
-      "etcd-$ETCD_VERSION-linux-amd64/etcdctl" \
-      "etcd-$ETCD_VERSION-linux-amd64/etcdutl"
+    tar -xzf "$BASE/etcd-$ETCD_VERSION-$ARCH.tar.gz" -C "$BIN" --strip-components=1 \
+      "etcd-$ETCD_VERSION-linux-$ARCH/etcd" \
+      "etcd-$ETCD_VERSION-linux-$ARCH/etcdctl" \
+      "etcd-$ETCD_VERSION-linux-$ARCH/etcdutl"
   fi
   chmod +x "$BIN"/kube-* "$BIN"/kubectl "$BIN"/etcd*
 }

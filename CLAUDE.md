@@ -45,6 +45,16 @@ git push origin HEAD:main            # fast-forward 로만 반영
 - main 에 force push 하지 않는다. `HEAD:main` push 가 거부되면 원인(다른 커밋이 먼저 들어갔는지)을 확인하고 다시 rebase 한다.
 - push 후 1~2분 뒤 사이트에서 새 Day 가 보이는지 확인한다.
 
+## 로컬 PC 에서 작업할 때
+
+클라우드 세션과 사용자의 로컬 PC 가 같은 저장소의 `main` 에 push 한다.
+
+- 시작하기 전에 `git checkout main && git pull` 로 최신화한다. 클라우드 세션을 `claude --teleport` 로 가져온 경우 `claude/...` 브랜치에 있을 수 있다.
+- 로컬에는 세션 작업 브랜치가 없으므로 `main` 에서 바로 커밋하고, `git pull --rebase origin main` 후 `git push origin main` 한다. force push 는 하지 않는다.
+- 정답 검증 샌드박스(`scripts/sandbox.sh`)는 Linux(amd64/arm64)에서만 돈다. Windows 는 WSL2 안에서 실행한다. 샌드박스를 띄울 수 없는 환경(macOS 등)에서는 Docker Desktop·kind 같은 로컬 클러스터가 있으면 `kubectl apply --dry-run=server` 와 실제 실행으로 검증하고, 없으면 공식 문서로 확인한 뒤 실행해 보지 못한 부분을 사용자에게 알린다.
+- `scripts/cka.py` 는 Python 3.8 이상 표준 라이브러리와 `curl` 만 쓴다(PyYAML 은 있으면 YAML 문법 검사에 쓴다). Windows 에서는 `python3` 대신 `python`.
+- 사이트 미리보기: `python3 -m http.server -d docs 8000` → http://localhost:8000
+
 ## 사이트 코드를 고칠 때
 
 - 외부 라이브러리는 `docs/assets/vendor/` 에 고정 버전으로 둔다(marked 15.0.12, highlight.js 11.11.1). CDN 에 의존하지 않는다.

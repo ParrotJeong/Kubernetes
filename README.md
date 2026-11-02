@@ -24,15 +24,23 @@ Claude 가 매일 문제를 만들어 올립니다.
 
 진도 체크와 시험일은 브라우저에만 저장됩니다.
 
-## 로컬에서 보기
+## 로컬 PC 에서 작업하기
 
 ```bash
-python3 -m http.server -d docs 8000   # http://localhost:8000
+git clone https://github.com/ParrotJeong/Kubernetes.git
+cd Kubernetes
+python3 -m http.server -d docs 8000   # 사이트 미리보기: http://localhost:8000 (Windows 는 python)
 ```
+
+이 폴더에서 Claude Code 를 실행하면(`claude`, 또는 Claude 데스크톱 앱의 Code 탭에서 이 폴더 선택)
+`CLAUDE.md` 와 `cka-daily` 스킬이 자동으로 적용되어 클라우드와 똑같이 **“오늘 CKA 문제 만들어줘”** 로 쓸 수 있습니다.
+클라우드 세션을 대화째 이어서 하려면 이 폴더에서 `claude --teleport` 를 실행해 세션을 고릅니다.
+
+클라우드 세션과 로컬 PC 가 모두 `main` 에 올리므로, 작업 전에 항상 `git pull` 하세요.
 
 ## 정답 검증용 샌드박스
 
-문제를 만들 때 정답 명령과 YAML 을 실제 API 서버에서 검증합니다.
+문제를 만들 때 정답 명령과 YAML 을 실제 API 서버에서 검증합니다. Linux(amd64/arm64) 전용이며, Windows 에서는 WSL2 안에서 실행합니다.
 
 ```bash
 scripts/sandbox.sh up                  # etcd + kube-apiserver + controller-manager + scheduler (+ 가짜 kubelet)
