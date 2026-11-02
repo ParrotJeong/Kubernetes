@@ -51,7 +51,8 @@ git push origin HEAD:main            # fast-forward 로만 반영
 
 - 시작하기 전에 `git checkout main && git pull` 로 최신화한다. 클라우드 세션을 `claude --teleport` 로 가져온 경우 `claude/...` 브랜치에 있을 수 있다.
 - 로컬에는 세션 작업 브랜치가 없으므로 `main` 에서 바로 커밋하고, `git pull --rebase origin main` 후 `git push origin main` 한다. force push 는 하지 않는다.
-- 정답 검증 샌드박스(`scripts/sandbox.sh`)는 Linux(amd64/arm64)에서만 돈다. Windows 는 WSL2 안에서 실행한다. 샌드박스를 띄울 수 없는 환경(macOS 등)에서는 Docker Desktop·kind 같은 로컬 클러스터가 있으면 `kubectl apply --dry-run=server` 와 실제 실행으로 검증하고, 없으면 공식 문서로 확인한 뒤 실행해 보지 못한 부분을 사용자에게 알린다.
+- 정답 검증 샌드박스(`scripts/sandbox.sh`)는 Linux(amd64/arm64)에서만 돈다. Windows 는 WSL2 안에서 실행한다.
+- 사용자의 로컬 PC 는 **맥북(macOS)** 이다(2026-11-02). macOS 에서는 샌드박스 대신 연습용 kind 클러스터(`kind create cluster --name cka`, 컨텍스트 `kind-cka`)가 있으면 `kubectl --context kind-cka ...` 로 검증한다. **다른 kubectl 컨텍스트(회사·운영 클러스터 등)에는 절대 실행하지 않는다.** kind 클러스터가 없으면 공식 문서로 확인하고, 실행해 보지 못한 부분을 사용자에게 알린다.
 - `scripts/cka.py` 는 Python 3.8 이상 표준 라이브러리와 `curl` 만 쓴다(PyYAML 은 있으면 YAML 문법 검사에 쓴다). Windows 에서는 `python3` 대신 `python`.
 - 사이트 미리보기: `python3 -m http.server -d docs 8000` → http://localhost:8000
 
